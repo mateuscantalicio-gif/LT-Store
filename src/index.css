@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Bodoni Moda", serif;
+  --font-sans: "Lato", sans-serif;
+  --color-primary: #1a1a1a;
+  --color-gold: #c5a059;
+  --color-cream: #f9f7f2;
+  --color-mp-blue: #009ee3;
+  --color-success: #22c55e;
+}
+
+@layer base {
+  body {
+    @apply font-sans text-primary bg-white;
+  }
+  
+  .logo {
+    @apply font-serif;
+  }
+}
+
+@layer components {
+  .btn-square {
+    @apply px-8 py-3 uppercase text-[10px] font-bold tracking-[0.2em] transition-all duration-300 rounded-none;
+  }
+  
+  .btn-primary {
+    @apply bg-primary text-white hover:bg-gold;
+  }
+  
+  .btn-gold {
+    @apply bg-gold text-white hover:bg-primary;
+  }
+  
+  .section-title {
+    @apply text-3xl md:text-4xl font-serif text-center mb-12 uppercase tracking-widest;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-gray-100;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-gold;
+}
+
+/* Page transitions */
+.page-enter {
+  opacity: 0;
+  transform: translateY(20px);
+}
+.page-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.5s, transform 0.5s;
+}
+.page-exit {
+  opacity: 1;
+}
+.page-exit-active {
+  opacity: 0;
+  transition: opacity 0.3s;
+}
