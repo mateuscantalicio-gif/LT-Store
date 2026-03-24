@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LT STORE | Google Sites Version</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+    
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Framer Motion -->
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+    
+    <!-- Lucide Icons (UMD) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        :root {
+            --primary: #1a1a1a;
+            --gold: #c5a059;
+            --cream: #fdfcf9;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fff;
+            color: var(--primary);
+            margin: 0;
+            padding: 0;
+        }
+
+        .font-serif { font-family: 'Playfair Display', serif; }
+
+        .btn-square {
+            display: inline-block;
+            padding: 0.75rem 2rem;
+            text-transform: uppercase;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background-color: black;
+            color: white;
+        }
+        .btn-primary:hover { background-color: #c5a059; }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.25rem;
+            font-family: 'Playfair Display', serif;
+            margin-bottom: 4rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* Esconder scrollbar mas manter funcionalidade */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1a1a1a',
+                        gold: '#c5a059',
+                        cream: '#fdfcf9',
+                        'mp-blue': '#009ee3'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+        const { motion, AnimatePresence } = FramerMotion;
+
+        // Helper para ícones Lucide no React sem a lib lucide-react (mais estável para CDN)
+        const Icon = ({ name, className = "w-6 h-6" }) => {
+            useEffect(() => {
+                lucide.createIcons();
+            }, [name]);
+            return <i data-lucide={name} className={className}></i>;
+        };
+
+        // Dados dos Produtos
+        const products = [
+            { id: 1, category: 'Vestidos', title: 'Vestido Seda Noir', price: 589.90, imageUrl: 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=800&auto=format&fit=crop', description: 'Vestido longo em seda pura com caimento impecável.', stock: 5 },
+            { id: 2, category: 'Alfaiataria', title: 'Blazer Estruturado Gold', price: 450.00, imageUrl: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=800&auto=format&fit=crop', description: 'Blazer de corte clássico com botões dourados.', stock: 3 },
+            { id: 3, category: 'Acessórios', title: 'Bolsa Couro Minimal', price: 320.00, imageUrl: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?q=80&w=800&auto=format&fit=crop', description: 'Bolsa em couro legítimo com design minimalista.', stock: 8 },
+            { id: 4, category: 'Vestidos', title: 'Vestido Midi Linho', price: 399.00, imageUrl: 'https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?q=80&w=800&auto=format&fit=crop', description: 'Conforto e elegância em linho premium.', stock: 0 },
+            { id: 5, category: 'Alfaiataria', title: 'Calça Pantalona Ivory', price: 289.00, imageUrl: 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?q=80&w=800&auto=format&fit=crop', description: 'Cintura alta e corte amplo.', stock: 4 },
+            { id: 6, category: 'Acessórios', title: 'Cinto Elos Dourados', price: 159.00, imageUrl: 'https://images.unsplash.com/photo-1624222247344-550fb60583dc?q=80&w=800&auto=format&fit=crop', description: 'O detalhe que faltava para seu look.', stock: 12 },
+            { id: 7, category: 'Vestidos', title: 'Vestido Slip Satin', price: 420.00, imageUrl: 'https://images.unsplash.com/photo-1572804013307-a9a111d7248e?q=80&w=800&auto=format&fit=crop', description: 'Brilho sutil e toque macio.', stock: 2 },
+            { id: 8, category: 'Alfaiataria', title: 'Colete Alfaiataria Chic', price: 245.00, imageUrl: 'https://images.unsplash.com/photo-1621184455862-c163dfb30e0f?q=80&w=800&auto=format&fit=crop', description: 'Peça versátil para sobreposições.', stock: 0 },
+            { id: 9, category: 'Acessórios', title: 'Óculos de Sol Vintage', price: 199.00, imageUrl: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?q=80&w=800&auto=format&fit=crop', description: 'Proteção UV com estilo clássico.', stock: 6 }
+        ];
+
+        function App() {
+            const [currentPage, setCurrentPage] = useState('home');
+            const [cart, setCart] = useState(() => {
+                try {
+                    const saved = localStorage.getItem('lt_store_cart');
+                    return saved ? JSON.parse(saved) : [];
+                } catch (e) { return []; }
+            });
+            const [isCartOpen, setIsCartOpen] = useState(false);
+            const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+            const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
+            const [searchQuery, setSearchQuery] = useState('');
+            const [selectedCategory, setSelectedCategory] = useState('Todos');
+            const [selectedProduct, setSelectedProduct] = useState(null);
+            const [selectedSize, setSelectedSize] = useState(null);
+            const [currentSlide, setCurrentSlide] = useState(0);
+
+            useEffect(() => {
+                try { localStorage.setItem('lt_store_cart', JSON.stringify(cart)); } catch (e) {}
+            }, [cart]);
+
+            const nav = (page) => {
+                setCurrentPage(page);
+                window.scrollTo(0, 0);
+            };
+
+            const addToCart = (product, size) => {
+                setCart(prev => {
+                    const existing = prev.find(item => item.id === product.id && item.selectedSize === size);
+                    if (existing) {
+                        return prev.map(item => (item.id === product.id && item.selectedSize === size) ? { ...item, quantity: item.quantity + 1 } : item);
+                    }
+                    return [...prev, { ...product, quantity: 1, selectedSize: size }];
+                });
+                setSelectedProduct(null);
+                setSelectedSize(null);
+                setIsCartOpen(true);
+            };
+
+            const subtotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+            const total = subtotal + (subtotal > 400 ? 0 : 25);
+
+            const filteredProducts = useMemo(() => {
+                return products.filter(p => p.title.toLowerCase().includes(searchQuery.toLowerCase()) && (selectedCategory === 'Todos' || p.category === selectedCategory));
+            }, [searchQuery, selectedCategory]);
+
+            const slides = [
+                { image: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=1920&auto=format&fit=crop', title: 'Coleção Minimalista' },
+                { image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=1920&auto=format&fit=crop', title: 'Alfaiataria Moderna' }
+            ];
+
+            useEffect(() => {
+                const timer = setInterval(() => setCurrentSlide(prev => (prev + 1) % slides.length), 5000);
+                return () => clearInterval(timer);
+            }, []);
+
+            return (
+                <div className="min-h-screen flex flex-col bg-white">
+                    {/* Header */}
+                    <header className="fixed top-0 left-0 w-full bg-white/95 backdrop-blur-sm z-50 border-b border-gray-100 h-20 flex items-center">
+                        <div className="max-w-7xl mx-auto px-4 w-full flex items-center justify-between">
+                            <h1 className="text-2xl font-bold tracking-tighter cursor-pointer" onClick={() => nav('home')}>LT STORE</h1>
+                            
+                            <nav className="hidden md:flex gap-6 uppercase text-[10px] font-bold tracking-widest">
+                                <button onClick={() => nav('home')} className={currentPage === 'home' ? 'text-gold' : ''}>Home</button>
+                                <button onClick={() => nav('store')} className={currentPage === 'store' ? 'text-gold' : ''}>Loja</button>
+                                <button onClick={() => nav('about')} className={currentPage === 'about' ? 'text-gold' : ''}>Sobre</button>
+                            </nav>
+
+                            <div className="flex items-center gap-4">
+                                <button className="relative p-2" onClick={() => setIsCartOpen(true)}>
+                                    <Icon name="shopping-bag" />
+                                    {cart.length > 0 && <span className="absolute top-0 right-0 bg-gold text-white text-[8px] w-4 h-4 rounded-full flex items-center justify-center">{cart.length}</span>}
+                                </button>
+                                <button className="md:hidden p-2" onClick={() => setIsMobileMenuOpen(true)}>
+                                    <Icon name="menu" />
+                                </button>
+                            </div>
+                        </div>
+                    </header>
+
+                    <main className="flex-grow pt-20">
+                        {currentPage === 'home' && (
+                            <section>
+                                <div className="relative h-[60vh] md:h-[80vh] overflow-hidden bg-gray-900">
+                                    {slides.map((slide, i) => (
+                                        <motion.div key={i} className="absolute inset-0" animate={{ opacity: currentSlide === i ? 1 : 0 }}>
+                                            <img src={slide.image} className="w-full h-full object-cover opacity-60" />
+                                            <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center p-4">
+                                                <h2 className="text-4xl md:text-6xl font-serif uppercase tracking-widest mb-6">{slide.title}</h2>
+                                                <button className="btn-square bg-white text-black" onClick={() => nav('store')}>Ver Loja</button>
+                                            </div>
+                                        </motion.div>
+                                    ))}
+                                </div>
+
+                                <div className="py-20 max-w-7xl mx-auto px-4">
+                                    <h3 className="section-title">Destaques</h3>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                                        {products.slice(0, 3).map(p => (
+                                            <div key={p.id} className="cursor-pointer group" onClick={() => setSelectedProduct(p)}>
+                                                <div className="aspect-[3/4] overflow-hidden mb-4 bg-gray-50">
+                                                    <img src={p.imageUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                                                </div>
+                                                <h4 className="text-center font-bold uppercase text-sm">{p.title}</h4>
+                                                <p className="text-center text-gray-500 text-sm">R$ {p.price.toFixed(2)}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </section>
+                        )}
+
+                        {currentPage === 'store' && (
+                            <section className="py-12 max-w-7xl mx-auto px-4">
+                                <div className="flex flex-col md:flex-row gap-10">
+                                    <aside className="w-full md:w-64 space-y-8">
+                                        <div>
+                                            <h4 className="font-bold uppercase text-xs tracking-widest mb-4 border-b pb-2">Busca</h4>
+                                            <input type="text" placeholder="Pesquisar..." className="w-full bg-gray-50 p-2 text-sm outline-none border-none" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+                                        </div>
+                                        <div>
+                                            <button className="w-full flex justify-between md:pointer-events-none border-b pb-2" onClick={() => setIsCategoriesOpen(!isCategoriesOpen)}>
+                                                <h4 className="font-bold uppercase text-xs tracking-widest">Categorias</h4>
+                                                <Icon name="chevron-down" className="md:hidden w-4 h-4" />
+                                            </button>
+                                            <div className={`${isCategoriesOpen ? 'flex' : 'hidden'} md:flex flex-col gap-2 mt-4`}>
+                                                {['Todos', 'Vestidos', 'Alfaiataria', 'Acessórios'].map(c => (
+                                                    <button key={c} className={`text-left text-sm ${selectedCategory === c ? 'text-gold font-bold' : 'text-gray-400'}`} onClick={() => { setSelectedCategory(c); setIsCategoriesOpen(false); }}>{c}</button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </aside>
+                                    <div className="flex-grow grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                                        {filteredProducts.map(p => (
+                                            <div key={p.id} className="cursor-pointer" onClick={() => setSelectedProduct(p)}>
+                                                <div className="aspect-[3/4] overflow-hidden mb-4 bg-gray-50">
+                                                    <img src={p.imageUrl} className="w-full h-full object-cover" />
+                                                </div>
+                                                <h4 className="font-bold uppercase text-xs">{p.title}</h4>
+                                                <p className="text-gray-500 text-xs">R$ {p.price.toFixed(2)}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </section>
+                        )}
+                    </main>
+
+                    {/* Footer */}
+                    <footer className="bg-black text-white py-16 text-center">
+                        <h2 className="text-2xl font-bold mb-4">LT STORE</h2>
+                        <p className="text-gray-500 text-[10px] uppercase tracking-widest">© 2024 Elegância Minimalista</p>
+                    </footer>
+
+                    {/* Modais (Simplificados para compatibilidade) */}
+                    <AnimatePresence>
+                        {selectedProduct && (
+                            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                                <div className="absolute inset-0 bg-black/80" onClick={() => setSelectedProduct(null)}></div>
+                                <motion.div initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto relative z-10 flex flex-col md:flex-row">
+                                    <button className="absolute top-4 right-4 z-20 bg-white p-2 rounded-full" onClick={() => setSelectedProduct(null)}><Icon name="x" /></button>
+                                    <div className="w-full md:w-1/2 h-80 md:h-auto"><img src={selectedProduct.imageUrl} className="w-full h-full object-cover" /></div>
+                                    <div className="p-8 md:w-1/2 flex flex-col justify-center">
+                                        <h2 className="text-2xl font-serif mb-4 uppercase">{selectedProduct.title}</h2>
+                                        <p className="text-xl font-bold mb-6">R$ {selectedProduct.price.toFixed(2)}</p>
+                                        <div className="flex gap-2 mb-8">
+                                            {['P', 'M', 'G'].map(s => (
+                                                <button key={s} className={`w-10 h-10 border ${selectedSize === s ? 'bg-black text-white' : ''}`} onClick={() => setSelectedSize(s)}>{s}</button>
+                                            ))}
+                                        </div>
+                                        <button className="btn-square btn-primary w-full" onClick={() => selectedSize && addToCart(selectedProduct, selectedSize)}>Adicionar ao Carrinho</button>
+                                    </div>
+                                </motion.div>
+                            </div>
+                        )}
+                    </AnimatePresence>
+
+                    {/* Carrinho lateral */}
+                    <AnimatePresence>
+                        {isCartOpen && (
+                            <div className="fixed inset-0 z-[100]">
+                                <div className="absolute inset-0 bg-black/50" onClick={() => setIsCartOpen(false)}></div>
+                                <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} className="absolute right-0 top-0 h-full w-full max-w-sm bg-white shadow-xl p-6 flex flex-col">
+                                    <div className="flex justify-between items-center mb-8">
+                                        <h3 className="font-bold uppercase tracking-widest">Carrinho</h3>
+                                        <button onClick={() => setIsCartOpen(false)}><Icon name="x" /></button>
+                                    </div>
+                                    <div className="flex-grow overflow-y-auto space-y-4">
+                                        {cart.length === 0 ? <p className="text-center text-gray-400 italic mt-20">Vazio</p> : cart.map((item, i) => (
+                                            <div key={i} className="flex gap-4 border-b pb-4">
+                                                <img src={item.imageUrl} className="w-16 h-20 object-cover" />
+                                                <div className="flex-grow">
+                                                    <h4 className="text-xs font-bold uppercase">{item.title}</h4>
+                                                    <p className="text-[10px] text-gray-500">Tam: {item.selectedSize} | Qtd: {item.quantity}</p>
+                                                    <p className="text-xs font-bold">R$ {item.price.toFixed(2)}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    {cart.length > 0 && (
+                                        <div className="pt-6 border-t">
+                                            <div className="flex justify-between font-bold mb-4"><span>Total</span><span>R$ {total.toFixed(2)}</span></div>
+                                            <button className="btn-square btn-primary w-full" onClick={() => alert('Finalizando via WhatsApp...')}>Finalizar</button>
+                                        </div>
+                                    )}
+                                </motion.div>
+                            </div>
+                        )}
+                    </AnimatePresence>
+
+                    {/* Menu Mobile lateral */}
+                    <AnimatePresence>
+                        {isMobileMenuOpen && (
+                            <div className="fixed inset-0 z-[100]">
+                                <div className="absolute inset-0 bg-black/50" onClick={() => setIsMobileMenuOpen(false)}></div>
+                                <motion.div initial={{ x: '-100%' }} animate={{ x: 0 }} className="absolute left-0 top-0 h-full w-64 bg-white shadow-xl p-6">
+                                    <div className="flex justify-between items-center mb-10">
+                                        <h3 className="font-bold uppercase">Menu</h3>
+                                        <button onClick={() => setIsMobileMenuOpen(false)}><Icon name="x" /></button>
+                                    </div>
+                                    <nav className="flex flex-col gap-6 font-bold uppercase text-sm tracking-widest">
+                                        <button onClick={() => { nav('home'); setIsMobileMenuOpen(false); }}>Home</button>
+                                        <button onClick={() => { nav('store'); setIsMobileMenuOpen(false); }}>Loja</button>
+                                        <button onClick={() => { nav('about'); setIsMobileMenuOpen(false); }}>Sobre</button>
+                                    </nav>
+                                </motion.div>
+                            </div>
+                        )}
+                    </AnimatePresence>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
